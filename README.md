@@ -1,10 +1,10 @@
 # cdk
 
-This is a CDK script to build a demo with RDS, SCT, DMS, and Redshift. It builds all the infrastructure which:
+This is a CDK script to build a demo with RDS, SCT, DMS, and Redshift. It builds 4 stacks (vpc, rds, redshift, and dms) which:
 
 1) creates an RDS (SQL Server) instance and a Redshift cluster
-2) allow connections from the Internet to RDS and Redshift through a tool like DBeaver. Caution: RDS and Redshift are deployed on public subnets. This is just for test purposes. It is not the best architecture for production environments.
-3) configure a DMS instance, RDS and Redshift endpoints, and a migration task.
+2) allows connections from the Internet to RDS and Redshift through a database management tool like [DBeaver](https://dbeaver.io/). Caution: RDS and Redshift are deployed on public subnets. This is just for test purposes. It is not the best architecture for production environments.
+3) configures a DMS instance, RDS and Redshift endpoints, and a migration task.
 
 After stack creation, you can manually:
 
