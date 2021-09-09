@@ -33,7 +33,7 @@ class VpcStack(core.Stack):
         # # core.CfnOutput(self, "Output",
         # #                value=self.vpc.vpc_id)
 
-        self.vpc = ec2.Vpc(self, "VPC")
+        self.vpc = ec2.Vpc(self, "vpc")
 
     @property
     def get_vpc(self):

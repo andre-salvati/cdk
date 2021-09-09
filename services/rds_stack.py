@@ -6,7 +6,7 @@ import aws_cdk.aws_iam as iam
 
 class RdsStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, id: str, vpc, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, vpc, config, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
     # https://blog.codecentric.de/en/2019/11/aws-cdk-part-3-how-to-create-an-rds-instance/
@@ -69,7 +69,9 @@ class RdsStack(core.Stack):
             connection=ec2.Port.tcp(1433)
         )
 
-        bucket = s3.Bucket(self, "s3bucket", bucket_name = "sc-sql-backup-restore")
+        prefix = config['default']['stack_prefix']
+
+        bucket = s3.Bucket(self, "s3bucket", bucket_name = f"{prefix}-backup-restore")
 
         policy_s3 = {
                 "Version": "2012-10-17",
@@ -82,7 +84,7 @@ class RdsStack(core.Stack):
                             "s3:ListBucket",
                             "s3:GetBucketLocation"
                         ],
-                    "Resource": "arn:aws:s3:::sc-sql-backup-restore"
+                    "Resource": f"arn:aws:s3:::{prefix}-backup-restore"
                     },
                     {
                     "Effect": "Allow",
@@ -105,7 +107,7 @@ class RdsStack(core.Stack):
 
         rds_role_s3.attach_inline_policy(iam.Policy(self, "policy_s3", document=iam.PolicyDocument.from_json(policy_s3)))
         
-        opt_group = rds.OptionGroup(self, id = "teste",
+        opt_group = rds.OptionGroup(self, id = "option_group",
             engine = rds.DatabaseInstanceEngine.sql_server_ex(version=rds.SqlServerEngineVersion.VER_14),
             configurations = [{
                 "name": 'SQLSERVER_BACKUP_RESTORE',
@@ -117,8 +119,8 @@ class RdsStack(core.Stack):
             #database_name="dbSource",
             #engine=rds.DatabaseInstanceEngine.mysql(version=rds.MysqlEngineVersion.VER_8_0_16),
             engine=rds.DatabaseInstanceEngine.sql_server_ex(version=rds.SqlServerEngineVersion.VER_14),
-            credentials = rds.Credentials.from_password(username="adminuser", 
-                                                        password=core.SecretValue("Admin12345")),
+            credentials = rds.Credentials.from_password(username=config['default']['rds_user'], 
+                                                        password=core.SecretValue(config['default']['rds_pass'])),
             vpc=vpc.get_vpc,
             #port=3306,
             #credentials=rds.Credentials.from_generated_secret("dms-rds-password"),

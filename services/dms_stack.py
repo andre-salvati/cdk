@@ -10,7 +10,7 @@ from aws_cdk import (
 
 class DmsStack(core.Stack):
 
-    def __init__(self, scope: core.Construct, id: str, vpc, db, redshift, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, vpc, db, redshift, config, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         # https://stackoverflow.com/questions/58542334/aws-dms-database-migration-service-system-error-messagethe-iam-role-arnawsi
@@ -28,14 +28,14 @@ class DmsStack(core.Stack):
 
         subnet_group = dms.CfnReplicationSubnetGroup(self, 'dms-sg',
             replication_subnet_group_description = "subnet group para DMS",
-            replication_subnet_group_identifier= 'sc-dms-subnetgroup',
+            replication_subnet_group_identifier= 'dms-subnetgroup',
             subnet_ids=vpc.get_vpc_private_subnet_ids)
 
         subnet_group.node.add_dependency(dms_role)
 
         instance = dms.CfnReplicationInstance(self, "dms-instance",
             #publicly_accessible = False,
-            replication_subnet_group_identifier="sc-dms-subnetgroup",
+            replication_subnet_group_identifier="dms-subnetgroup",
             replication_instance_class="dms.t2.small")
 
         instance.add_depends_on(subnet_group)
@@ -43,16 +43,16 @@ class DmsStack(core.Stack):
         if db != None:
 
             source = dms.CfnEndpoint(self, "source",
-                endpoint_identifier= "sc-dms-source",
+                endpoint_identifier= "dms-source",
                 endpoint_type= "source",
                 engine_name= "sqlserver",
                 server_name= db.get_endpoint_address,
                 #port= 3306, # mysql
                 port= 1433, # sqlserver
                 database_name= "master",
-                username= "adminuser",
+                username= config['default']['rds_user'],
                 #password=secret.secret_value)
-                password="Admin12345")
+                password=config['default']['rds_pass'],)
 
         if redshift != None:
 
@@ -63,14 +63,14 @@ class DmsStack(core.Stack):
             )
             
             target = dms.CfnEndpoint(self, "target",
-                endpoint_identifier= "sc-dms-target",
+                endpoint_identifier= "dms-target",
                 endpoint_type= "target",
                 engine_name= "redshift",
                 server_name= redshift.get_endpoint_address,
                 port= 5439,
                 database_name= "comments_cluster",
-                username= "dwh_user",
-                password="Teste12345")
+                username= config['default']['redshift_user'],
+                password=config['default']['redshift_pass'],)
 
         if db != None and redshift != None:
 

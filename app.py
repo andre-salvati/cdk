@@ -6,17 +6,23 @@ from services.vpc_stack import VpcStack
 from services.rds_stack import RdsStack
 from services.dms_stack import DmsStack
 from services.redshift_stack import RedshiftStack
+import configparser
+
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+prefix = config['default']['stack_prefix']
 
 app = core.App()
 
-vpc_stack = VpcStack(app, "poc-sc-vpc")
+vpc_stack = VpcStack(app, f"{prefix}-vpc")
 
-rds_stack = RdsStack(app, "poc-sc-rds", vpc=vpc_stack)
+rds_stack = RdsStack(app, f"{prefix}-rds", vpc_stack, config)
 #rds_stack = None
 
-redshift_stack = RedshiftStack(app, "poc-sc-redshift", vpc=vpc_stack)
+redshift_stack = RedshiftStack(app, f"{prefix}-redshift", vpc_stack, config)
 #redshift_stack = None
 
-#dms_stack = DmsStackSC(app, "poc-sc-dms", vpc=vpc_stack, db=rds_stack, redshift=redshift_stack)
+dms_stack = DmsStack(app, f"{prefix}-dms", vpc_stack, rds_stack, redshift_stack, config)
 
 app.synth()
