@@ -1,6 +1,6 @@
 # cdk
 
-This is a CDK script to build a demo with RDS, SCT, DMS, and Redshift. It builds 4 stacks (vpc, rds, redshift, and dms) which:
+This is a CDK script to build a demo with AWS RDS, AWS SCT (Schema Conversion Tool), AWS DMS (Database Migration Service), and Redshift. It builds 4 stacks (vpc, rds, redshift, and dms) which:
 
 1) creates an RDS (SQL Server) instance and a Redshift cluster
 2) allows connections from the Internet to RDS and Redshift through a database management tool like [DBeaver](https://dbeaver.io/). Caution: RDS and Redshift are deployed on public subnets. This is just for test purposes. It is not the best architecture for production environments.
